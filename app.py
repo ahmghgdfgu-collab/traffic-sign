@@ -38,19 +38,45 @@ with col1:
     uploaded_file = st.file_uploader("Upload Test Image", type=["png", "jpg", "jpeg"])
 
     if uploaded_file is not None:
-        # Convert file to PIL Image
-        image = Image.open(uploaded_file).convert("RGB")
-        st.image(image, caption="Analysis Target", use_container_width=True)
+        # 1. Image Loading & Validation
+        try:
+            image = Image.open(uploaded_file).convert("RGB")
+            st.image(image, caption=f"Input: {image.size}", use_container_width=True)
+        except Exception as e:
+            st.error(f"Image Load Failed: {e}")
+            st.stop()
         
-        # Trigger Inference
+        # 2. Inference Trigger
         if st.button("Run Inference", type="primary"):
+            
+            # --- CLEAR OLD RESULTS (Prevent Stale Data) ---
+            if 'results' in st.session_state:
+                del st.session_state['results']
+            
+            status_container = st.empty()
             with st.spinner("Processing neural activation..."):
-                # Inference call
-                raw_preds = predict_multihead(model, image)
-                results = decode_predictions(raw_preds)
-                
-                # Store results in session state to persist during reruns
-                st.session_state['results'] = results
+                try:
+                    # Debug Point 1
+                    status_container.info("Step 1/3: Encoding Image Tensor...")
+                    
+                    # Inference call
+                    raw_preds = predict_multihead(model, image)
+                    
+                    # Debug Point 2
+                    status_container.info("Step 2/3: Decoding Logits...")
+                    results = decode_predictions(raw_preds)
+                    
+                    # Store results
+                    st.session_state['results'] = results
+                    status_container.success("Inference Complete!")
+                    
+                    # Force Rerun to display results immediately
+                    st.rerun()
+
+                except Exception as e:
+                    # 🚨 THIS WILL REVEAL THE ROOT CAUSE 🚨
+                    status_container.error(f"Inference Crash: {e}")
+                    st.error(f"Traceback: {e}")
 
 with col2:
     st.subheader("Real-time Telemetry")
