@@ -1,0 +1,10 @@
+[theme]
+primaryColor = "#F63366"
+backgroundColor = "#0E1117"
+secondaryBackgroundColor = "#262730"
+textColor = "#FAFAFA"
+font = "sans serif"
+
+[server]
+enableCORS = false
+maxUploadSize = 5  # Limits uploads to 5MB to prevent server overload

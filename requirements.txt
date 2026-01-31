@@ -1,0 +1,13 @@
+# Core ML Stack
+tensorflow==2.19.0
+numpy==2.0.2
+pandas==2.2.2
+scikit-learn==1.6.1
+
+# Image Processing
+# We use headless OpenCV to avoid 'libGL.so' errors on Streamlit Cloud/Linux servers
+opencv-python-headless==4.12.0.75
+Pillow>=10.0.0
+
+# Deployment
+streamlit>=1.32.0
