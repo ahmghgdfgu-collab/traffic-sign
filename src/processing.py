@@ -6,17 +6,28 @@ from src.config import SIGN_CLASSES, SHAPE_CLASSES, COLOR_CLASSES
 
 def predict_multihead(model, pil_image):
     """
-    Standardizes input to (1, H, W, 3) and runs inference.
+    Standardizes input to the model's expected shape.
     """
-    # 1. Convert to Array
-    img_array = np.array(pil_image)
-    
-    # 2. SAFEGUARD: Ensure image is not too massive if model lacks resizing
-    # (Optional: You can uncomment this if the model crashes on large images)
-    # pil_image = pil_image.resize((64, 64)) 
-    # img_array = np.array(pil_image)
+    # 1. Inspect Model Input Shape (Auto-Detection)
+    try:
+        # Get expected shape from the model's first layer
+        # usually (None, Height, Width, 3)
+        input_shape = model.input_shape
+        target_h, target_w = input_shape[1], input_shape[2]
+        
+        # If shape is None (dynamic), fallback to a safe default like 64x64
+        if target_h is None or target_w is None:
+            target_h, target_w = 64, 64
+    except:
+        # Fallback if model inspection fails
+        target_h, target_w = 64, 64
 
-    # 3. Create Batch Dimension (1, Height, Width, Channels)
+    # 2. Force Resize (CRITICAL STEP)
+    # We must resize BEFORE creating the array, or TF will crash on shape mismatch
+    resized_img = pil_image.resize((target_w, target_h))
+    
+    # 3. Convert to Array & Batch
+    img_array = np.array(resized_img)
     img_tensor = tf.expand_dims(img_array, axis=0)
     
     # 4. Predict
