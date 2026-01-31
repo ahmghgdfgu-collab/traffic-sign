@@ -17,7 +17,7 @@ st.sidebar.header("System Status")
 model_status = st.sidebar.empty()
 
 try:
-    model = load_model_pipeline("model/best_multihead_model.keras")
+    model = load_model_pipeline("model/traffic_sign_multitask.keras")
     model_status.success("Model Loaded Successfully")
 except Exception as e:
     model_status.error("Model Failed to Load")
